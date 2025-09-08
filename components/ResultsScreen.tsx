@@ -155,6 +155,15 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
     setCelebrityImageError(false);
   }, [result]);
 
+  const handleDownloadImage = (imageBase64: string, id: number) => {
+    const link = document.createElement('a');
+    link.href = `data:image/jpeg;base64,${imageBase64}`;
+    link.download = `korean-glow-up-style-${id + 1}.jpeg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   let celebrityURL = result.koreanCelebrity.celebrityImageURL;
   try {
     celebrityURL = decodeURI(celebrityURL);
@@ -473,8 +482,15 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">Your Style Transformations</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                    {transformedResults.map((item) => (
-                        <div key={item.id} className="bg-white p-4 rounded-lg shadow-xl flex flex-col transition-transform hover:scale-105">
+                        <div key={item.id} className="relative group bg-white p-4 rounded-lg shadow-xl flex flex-col transition-transform hover:scale-105">
                            <img src={`data:image/jpeg;base64,${item.image}`} alt="Transformed selfie" className="rounded-lg shadow-md w-full aspect-square object-cover" />
+                            <button
+                             onClick={() => handleDownloadImage(item.image, item.id)}
+                             className="absolute top-6 right-6 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white"
+                             aria-label="Download image"
+                           >
+                             <DownloadIcon className="h-5 w-5" />
+                           </button>
                            <div className="mt-4 flex-grow">
                              <p className="text-gray-600 text-sm">{item.description}</p>
                            </div>

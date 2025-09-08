@@ -15,8 +15,8 @@ const imageSearchSchema = {
     required: ["imageUrl"]
 };
 
-export const findCelebrityImage = async (celebrityName: string): Promise<string> => {
-  const prompt = `Find a single, high-quality, publicly accessible, and directly embeddable image URL for the globally well-known Korean celebrity '${celebrityName}'.`;
+export const findCelebrityImageFromWeb = async (celebrityName: string): Promise<string> => {
+  const prompt = `Perform an image search for the globally well-known Korean celebrity '${celebrityName}'. From the search results, find one single, high-quality, publicly accessible image. Provide a direct, hotlinkable URL for this image. The URL must end in a common image format like .jpg, .png, or .webp. Do not provide a URL to a search results page.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -45,7 +45,7 @@ export const findCelebrityImage = async (celebrityName: string): Promise<string>
         }
     }
     
-    console.warn("findCelebrityImage with schema did not return a valid image URL, response was:", jsonText);
+    console.warn("findCelebrityImageFromWeb with schema did not return a valid image URL, response was:", jsonText);
     return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(celebrityName)}`;
 
   } catch (error) {
@@ -311,7 +311,6 @@ const formatFashionTipsForPrompt = (tips: FashionTips): string => {
 export const transformImage = async (
   imageBase64: string,
   season: string,
-  celebrityName: string,
   fashionTips: FashionTips,
   gender: Gender,
   style: KBeautyStyle,
@@ -327,7 +326,7 @@ export const transformImage = async (
       },
     };
 
-    let makeupInstruction = "Apply stylish K-beauty makeup that matches their season and the celebrity's aesthetic.";
+    let makeupInstruction = "Apply stylish K-beauty makeup that matches their season and the selected aesthetic.";
     if (gender === Gender.Male) {
         makeupInstruction = "Apply subtle K-beauty makeup suitable for men. Focus on creating a clean, even complexion, grooming the eyebrows, and perhaps adding a touch of natural lip color.";
     }
@@ -344,7 +343,7 @@ export const transformImage = async (
             styleInstruction = "Use a soft-focus, romantic filter. Makeup should feature muted, soft tones. Fashion should be nostalgic and elegant, inspired by classic Korean dramas. Hair should be soft and perhaps wavy.";
             break;
         case 'Celebrity Inspired':
-            styleInstruction = `Directly emulate the signature style of the celebrity inspiration, ${celebrityName}. Apply their makeup, hair, and fashion aesthetic to the user. **CRITICAL:** The user's original face and facial features MUST be preserved. The goal is to composite the user's face onto a new, celebrity-inspired look.`;
+            styleInstruction = `Create a high-fashion K-beauty look inspired by top Korean celebrities. Apply sophisticated makeup, trendy hair, and a chic fashion aesthetic based on the user's style guide. **CRITICAL:** The user's original face and facial features MUST be preserved. The goal is to give the user a celebrity-style makeover.`;
             break;
     }
 
@@ -370,16 +369,18 @@ export const transformImage = async (
     
     const variationInstruction = generateNewVariant
         ? `
-**Important Creative Direction:** This is a request for a *new variation*. The generated outfit must be noticeably different from any previous styles you have created for this user. You are encouraged to be creative and showcase variety. Experiment with different items from their recommended fashion list and use a different primary color combination from their palette.`
+**Critical Creative Direction:** This is a request for a *new variation*. The generated outfit **must be fundamentally different** from any previous styles. Do not just change colors on the same clothing items. Create a completely new outfit composition using a different combination of items from the style guide. You must showcase significant variety.
+- **Experiment Boldly:** Combine different tops, bottoms, outerwear, and accessories.
+- **Vary Color Schemes:** Use a new primary color combination from the user's palette for each generation.`
         : '';
 
     const fashionInstruction = `
-**Core Task:** Redesign the user's outfit completely based on a comprehensive style guide.
+**Core Task:** Redesign the user's outfit completely to create a diverse set of fashionable looks based on a comprehensive style guide.
 ${variationInstruction}
 **Creative Brief:**
-1.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Use a harmonious and stylish combination of these colors.
-2.  **Recommended Fashion Items:** Intelligently incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**.
-3.  **Celebrity Style Inspiration:** The overall vibe and specific fashion pieces should be heavily influenced by the signature style of **${celebrityName}**. Emulate their fashion sense.
+1.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Actively use different combinations of these colors to show variety.
+2.  **Recommended Fashion Items:** Intelligently and creatively incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**. Prioritize variety in the items chosen for each look.
+3.  **Style Inspiration:** The overall vibe should be inspired by modern K-beauty and celebrity fashion trends. The goal is to create a sophisticated, stylish, and cohesive look.
 4.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
 5.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
 `;
@@ -399,12 +400,11 @@ ${variationInstruction}
 **User Profile for Styling:**
 *   **Gender:** ${gender}
 *   **Personal Color Season:** ${season}
-*   **Inspiration:** Korean celebrity ${celebrityName}.
 
 **Transformation Guidelines:**
 1.  **Face Synthesis:** Keep the user's face, but seamlessly blend it into the new scene.
-2.  **Makeup:** ${makeupInstruction} Apply makeup inspired by ${celebrityName}'s signature looks.
-3.  **Hair:** Change the hair to a trendy Korean style and color that ${celebrityName} might wear, adapted to suit the user's season.
+2.  **Makeup:** ${makeupInstruction} Apply makeup inspired by top celebrity looks that complement the user's features.
+3.  **Hair:** Change the hair to a trendy Korean style and color that a celebrity might wear, adapted to suit the user's season.
 4.  **Fashion Details:**
 ${fashionInstruction}
 
@@ -412,6 +412,8 @@ ${fashionInstruction}
 After generating the edited image, provide a short, single-paragraph text description of the changes made (makeup, hair, fashion) and how they align with the '${style}' theme and the requested framing (${shotDescription}). Do not respond with only text.`;
     } else {
         promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover. Your response MUST include the edited image.**
+
+**CRITICAL REQUIREMENT:** You MUST retain the user's original facial features and identity. The final image must look like the same person from the input photo, but with a new style.
 
 **Framing:** ${shotInstruction}
 
@@ -421,12 +423,12 @@ After generating the edited image, provide a short, single-paragraph text descri
 **User Profile for Styling:**
 *   **Gender:** ${gender}
 *   **Personal Color Season:** ${season}
-*   **Inspiration:** Korean celebrity ${celebrityName}.
 
 **Transformation Guidelines:**
-1.  **Makeup:** ${makeupInstruction}
-2.  **Hair:** Change the hair to a trendy Korean style and color that suits their season and the theme.
-3.  **Fashion Details:**
+1.  **Face Synthesis:** Keep the user's face, but seamlessly blend it into the new scene.
+2.  **Makeup:** ${makeupInstruction}
+3.  **Hair:** Change the hair to a trendy Korean style and color that suits their season and the theme.
+4.  **Fashion Details:**
 ${fashionInstruction}
 
 **Output Requirement:**

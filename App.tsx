@@ -6,7 +6,7 @@ import ResultsScreen from './components/ResultsScreen';
 import GenderSelectionScreen from './components/GenderSelectionScreen';
 import { AppStep, Gender } from './types';
 import type { PersonalColorAnalysis, KBeautyStyle, ShotType } from './types';
-import { analyzePersonalColor, transformImage, findCelebrityImage } from './services/geminiService';
+import { analyzePersonalColor, transformImage, findCelebrityImageFromWeb } from './services/geminiService';
 
 interface TransformedResult {
     id: number;
@@ -61,7 +61,7 @@ const App: React.FC = () => {
       const partialResult = await analyzePersonalColor(imageSrc, gender);
 
       // Step 2: Find a reliable image URL for the celebrity
-      const celebrityImageUrl = await findCelebrityImage(partialResult.koreanCelebrity.name);
+      const celebrityImageUrl = await findCelebrityImageFromWeb(partialResult.koreanCelebrity.name);
 
       // Step 3: Combine the results into a complete analysis object
       const fullResult: PersonalColorAnalysis = {
@@ -115,7 +115,6 @@ const App: React.FC = () => {
             transformImage(
                 imageSrc, 
                 analysisResult.season, 
-                analysisResult.koreanCelebrity.name, 
                 analysisResult.fashionTips, 
                 gender, 
                 style, 
@@ -159,7 +158,6 @@ const App: React.FC = () => {
         const { newImageBase64, description } = await transformImage(
             imageSrc,
             analysisResult.season,
-            analysisResult.koreanCelebrity.name,
             analysisResult.fashionTips,
             gender,
             selectedStyle,
