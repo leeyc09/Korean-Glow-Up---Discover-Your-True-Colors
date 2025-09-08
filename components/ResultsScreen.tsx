@@ -128,6 +128,8 @@ interface ResultsScreenProps {
   isStyleModalOpen: boolean;
   onCloseStyleModal: () => void;
   onGenerateTransformation: (style: KBeautyStyle) => void;
+  onGenerateMore: () => void;
+  isGeneratingMore: boolean;
 }
 
 const ResultsScreen: React.FC<ResultsScreenProps> = ({ 
@@ -140,6 +142,8 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
     isStyleModalOpen,
     onCloseStyleModal,
     onGenerateTransformation,
+    onGenerateMore,
+    isGeneratingMore,
 }) => {
   const [isPreparingShare, setIsPreparingShare] = useState(false);
   const [celebrityImageError, setCelebrityImageError] = useState(false);
@@ -476,6 +480,26 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                            </div>
                         </div>
                     ))}
+                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center p-4 aspect-square group transition-colors hover:border-indigo-400 hover:bg-indigo-50">
+                        <button
+                            onClick={onGenerateMore}
+                            disabled={isTransforming || isGeneratingMore}
+                            className="flex flex-col items-center justify-center w-full h-full gap-2 text-gray-500 group-hover:text-indigo-600 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                            aria-label="Generate another style transformation"
+                        >
+                            {isGeneratingMore ? (
+                                <>
+                                    <div className="w-8 h-8 border-2 border-t-transparent border-indigo-500 rounded-full animate-spin"></div>
+                                    <span className="font-semibold mt-2">Generating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <PlusIcon className="h-10 w-10" />
+                                    <span className="font-semibold text-center">Generate Another<br/>Full-Body Style</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
         )}

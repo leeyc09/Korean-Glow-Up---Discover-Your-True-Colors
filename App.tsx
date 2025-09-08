@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [isTransforming, setIsTransforming] = useState<boolean>(false);
+  const [isGeneratingMore, setIsGeneratingMore] = useState<boolean>(false);
   const [transformedResults, setTransformedResults] = useState<TransformedResult[]>([]);
   const [isStyleModalOpen, setIsStyleModalOpen] = useState<boolean>(false);
   const [selectedStyle, setSelectedStyle] = useState<KBeautyStyle | null>(null);
@@ -89,6 +90,7 @@ const App: React.FC = () => {
       setTransformedResults([]);
       setIsStyleModalOpen(false);
       setSelectedStyle(null);
+      setIsGeneratingMore(false);
       setCurrentStep(AppStep.Welcome);
   }
 
@@ -144,6 +146,49 @@ const App: React.FC = () => {
     }
   }, [imageSrc, analysisResult, gender]);
 
+  const handleGenerateMore = useCallback(async () => {
+    if (!imageSrc || !analysisResult || !gender || !selectedStyle) {
+        setError("Missing data to generate more styles.");
+        return;
+    }
+
+    setIsGeneratingMore(true);
+    setError(null);
+
+    try {
+        const { newImageBase64, description } = await transformImage(
+            imageSrc,
+            analysisResult.season,
+            analysisResult.koreanCelebrity.name,
+            analysisResult.fashionTips,
+            gender,
+            selectedStyle,
+            'Full', // Always generate a 'Full' shot for "more"
+            analysisResult.palette,
+            true // Ask for a new variation
+        );
+
+        const newResult: TransformedResult = {
+            id: nextId++,
+            image: newImageBase64,
+            description: description,
+        };
+
+        setTransformedResults(prev => [...prev, newResult]);
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        if (errorMessage.includes("RESOURCE_EXHAUSTED") || errorMessage.includes("429")) {
+            setError("The style generator is currently very busy. Please wait a moment and try again.");
+        } else {
+            setError(errorMessage);
+        }
+    } finally {
+        setIsGeneratingMore(false);
+    }
+  }, [imageSrc, analysisResult, gender, selectedStyle]);
+
+
   const renderStep = () => {
     switch (currentStep) {
       case AppStep.Welcome:
@@ -175,6 +220,8 @@ const App: React.FC = () => {
                         isStyleModalOpen={isStyleModalOpen}
                         onCloseStyleModal={() => setIsStyleModalOpen(false)}
                         onGenerateTransformation={handleGenerateTransformation}
+                        onGenerateMore={handleGenerateMore}
+                        isGeneratingMore={isGeneratingMore}
                     />
                 </div>
             );

@@ -316,7 +316,8 @@ export const transformImage = async (
   gender: Gender,
   style: KBeautyStyle,
   shotType: ShotType,
-  palette?: ColorInfo[]
+  palette?: ColorInfo[],
+  generateNewVariant?: boolean
 ): Promise<{ newImageBase64: string; description: string }> => {
   try {
     const imagePart = {
@@ -367,8 +368,14 @@ export const transformImage = async (
     const fashionTipsString = formatFashionTipsForPrompt(fashionTips);
     const colorNames = palette && palette.length > 0 ? palette.map(c => c.name).join(', ') : 'the provided seasonal colors';
     
+    const variationInstruction = generateNewVariant
+        ? `
+**Important Creative Direction:** This is a request for a *new variation*. The generated outfit must be noticeably different from any previous styles you have created for this user. You are encouraged to be creative and showcase variety. Experiment with different items from their recommended fashion list and use a different primary color combination from their palette.`
+        : '';
+
     const fashionInstruction = `
 **Core Task:** Redesign the user's outfit completely based on a comprehensive style guide.
+${variationInstruction}
 **Creative Brief:**
 1.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Use a harmonious and stylish combination of these colors.
 2.  **Recommended Fashion Items:** Intelligently incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**.
