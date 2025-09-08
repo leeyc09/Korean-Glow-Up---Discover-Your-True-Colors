@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 // Fix: `Gender` is an enum used as a value, so it needs to be a regular import, not a type-only import.
 import { Gender, type PersonalColorAnalysis, type KBeautyStyle, type ShotType, type ColorInfo, type KoreanCelebrity, type FashionTips, type HairStylingTip, type FashionItem } from '../types';
@@ -303,8 +304,8 @@ export const analyzePersonalColor = async (imageBase64: string, gender: Gender):
 const formatFashionTipsForPrompt = (tips: FashionTips): string => {
     const clothing = `Key items to wear include ${tips.clothingItems.map(i => i.item).join(', ')}.`;
     const fabrics = `Focus on fabrics like ${tips.fabricsAndTextures.map(i => i.item).join(', ')}.`;
-    const accessories = `Accessorize with ${tips.accessories.map(i => i.item).join(', ')}.`;
-    return `${clothing} ${fabrics} ${accessories} Overall, the style is about ${tips.styleInspiration}.`;
+    // Accessories are now handled separately in the main prompt.
+    return `${clothing} ${fabrics} Overall, the style is about ${tips.styleInspiration}.`;
 };
 
 
@@ -366,6 +367,7 @@ export const transformImage = async (
 
     const fashionTipsString = formatFashionTipsForPrompt(fashionTips);
     const colorNames = palette && palette.length > 0 ? palette.map(c => c.name).join(', ') : 'the provided seasonal colors';
+    const accessoriesString = fashionTips.accessories.map(tip => tip.item).join(', ');
     
     const variationInstruction = generateNewVariant
         ? `
@@ -381,9 +383,10 @@ ${variationInstruction}
 1.  **Seasonal Theme:** Randomly select one of the four seasons (Spring, Summer, Autumn, or Winter) and design a complete outfit that is seasonally appropriate and fashionable. The chosen season should influence the type of clothing (e.g., a light dress for summer, a cozy coat for winter).
 2.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Actively use different combinations of these colors to show variety.
 3.  **Recommended Fashion Items:** Intelligently and creatively incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**. Prioritize variety in the items chosen for each look.
-4.  **Style Inspiration:** The overall vibe should be inspired by modern K-beauty and celebrity fashion trends. The goal is to create a sophisticated, stylish, and cohesive look.
-5.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
-6.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
+4.  **Accessories (Optional):** To enhance the style, you may optionally add accessories. If you do, select from this list: **${accessoriesString}**. The decision to include accessories and which specific ones to use should be made randomly to create more varied and interesting styles.
+5.  **Style Inspiration:** The overall vibe should be inspired by modern K-beauty and celebrity fashion trends. The goal is to create a sophisticated, stylish, and cohesive look.
+6.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
+7.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
 `;
 
     let promptText: string;
