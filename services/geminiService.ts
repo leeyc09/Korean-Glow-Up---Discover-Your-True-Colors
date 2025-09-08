@@ -343,7 +343,7 @@ export const transformImage = async (
             styleInstruction = "Use a soft-focus, romantic filter. Makeup should feature muted, soft tones. Fashion should be nostalgic and elegant, inspired by classic Korean dramas. Hair should be soft and perhaps wavy.";
             break;
         case 'Celebrity Inspired':
-            styleInstruction = `Create a high-fashion K-beauty look inspired by top Korean celebrities. Apply sophisticated makeup, trendy hair, and a chic fashion aesthetic based on the user's style guide. **CRITICAL:** The user's original face and facial features MUST be preserved. The goal is to give the user a celebrity-style makeover.`;
+            styleInstruction = `Create a high-fashion look that could be seen on a Seoul runway or worn by a lead in a K-drama. The aesthetic is sophisticated, trendy, and polished. Apply sophisticated makeup, trendy hair, and a chic fashion aesthetic based on the user's style guide. **CRITICAL:** The user's original face and facial features MUST be preserved. The goal is to give the user a celebrity-style makeover.`;
             break;
     }
 
@@ -391,7 +391,7 @@ ${variationInstruction}
     if (style === 'Celebrity Inspired') {
         promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover, compositing their face into a celebrity-inspired style. Your response MUST include the edited image.**
 
-**CRITICAL REQUIREMENT:** You MUST retain the user's original facial features and identity. The final image must look like the same person from the input photo, but with a new style.
+**CRITICAL REQUIREMENT: Use the user's face from the provided photo.** The most important instruction is to preserve the user's exact facial features, identity, and expression. The final image must be a realistic edit of the original person, not a new person.
 
 **Framing:** ${shotInstruction}
 
@@ -414,7 +414,7 @@ After generating the edited image, provide a short, single-paragraph text descri
     } else {
         promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover. Your response MUST include the edited image.**
 
-**CRITICAL REQUIREMENT:** You MUST retain the user's original facial features and identity. The final image must look like the same person from the input photo, but with a new style.
+**CRITICAL REQUIREMENT: Use the user's face from the provided photo.** The most important instruction is to preserve the user's exact facial features, identity, and expression. The final image must be a realistic edit of the original person, not a new person.
 
 **Framing:** ${shotInstruction}
 
