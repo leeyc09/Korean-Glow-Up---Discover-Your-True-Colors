@@ -1,0 +1,7 @@
+{
+  "name": "Korean Glow-Up - Discover Your True Colors",
+  "description": "Experience a Korean Glow-Up! Discover your personal color season by taking a selfie. This app analyzes your features to provide K-beauty recommendations and lets you visualize a complete virtual makeover.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
