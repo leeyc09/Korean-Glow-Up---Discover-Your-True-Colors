@@ -389,17 +389,28 @@ ${variationInstruction}
 7.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
 `;
 
+    const facePreservationRequirement = `**CRITICAL REQUIREMENT: Preserve the original face.** The user's face from the provided photo **must be used exactly as is**. This is the single most important rule. Do not alter their core facial structure, features (eyes, nose, mouth), or identity. The goal is a realistic visualization of a makeover on the *actual person* in the photo, not the creation of a new, different person. The final image must be instantly recognizable as the original individual.`;
+    
+    const artisticDirection = `**Artistic Direction & Quality:**
+*   **Realism:** Aim for hyper-realism and photorealism. The result should look like a real photograph.
+*   **Details:** Generate an image with extremely high detail, as if taken with a professional DSLR camera. Include realistic skin texture, hair strands, and fabric details.
+*   **Lighting:** Apply cinematic, professional studio lighting that enhances the user's features and the overall mood.
+*   **Focus:** The user's face must be in sharp focus.
+*   **Resolution:** The output should be of the highest possible quality, equivalent to 8K UHD.`;
+
     let promptText: string;
 
     if (style === 'Celebrity Inspired') {
-        promptText = `**Primary Task: Create a stylized fashion portrait of the user, using their photo as a base. Your response MUST include the edited image.**
+        promptText = `**Primary Task: Create a hyper-realistic, photorealistic fashion portrait of the user, using their photo as a base. Your response MUST include the edited image.**
 
-**CRITICAL REQUIREMENT: Use the user's face from the provided photo.** The most important instruction is to preserve the user's exact facial features, identity, and expression. The final image must be a realistic edit of the original person, not a new person.
+${facePreservationRequirement}
 
 **Framing:** ${shotInstruction}
 
 **Theme:** The artistic aesthetic for this portrait is **'${style}'**.
 *Theme Description:* ${styleInstruction}
+
+${artisticDirection}
 
 **User Profile for Styling:**
 *   **Gender:** ${gender}
@@ -415,14 +426,16 @@ ${fashionInstruction}
 **Output Requirement:**
 After generating the edited image, provide a short, single-paragraph text description of the changes made (makeup, hair, fashion) and how they align with the '${style}' theme and the requested framing (${shotDescription}). Do not respond with only text.`;
     } else {
-        promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover. Your response MUST include the edited image.**
+        promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover, resulting in a hyper-realistic, photorealistic image. Your response MUST include the edited image.**
 
-**CRITICAL REQUIREMENT: Use the user's face from the provided photo.** The most important instruction is to preserve the user's exact facial features, identity, and expression. The final image must be a realistic edit of the original person, not a new person.
+${facePreservationRequirement}
 
 **Framing:** ${shotInstruction}
 
 **Theme:** The aesthetic for this makeover is **'${style}'**.
 *Theme Description:* ${styleInstruction}
+
+${artisticDirection}
 
 **User Profile for Styling:**
 *   **Gender:** ${gender}
