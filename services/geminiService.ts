@@ -344,7 +344,7 @@ export const transformImage = async (
             styleInstruction = "Use a soft-focus, romantic filter. Makeup should feature muted, soft tones. Fashion should be nostalgic and elegant, inspired by classic Korean dramas. Hair should be soft and perhaps wavy.";
             break;
         case 'Celebrity Inspired':
-            styleInstruction = `Create a high-fashion look that could be seen on a Seoul runway or worn by a lead in a K-drama. The aesthetic is sophisticated, trendy, and polished. Apply sophisticated makeup, trendy hair, and a chic fashion aesthetic based on the user's style guide. **CRITICAL:** The user's original face and facial features MUST be preserved. The goal is to give the user a celebrity-style makeover.`;
+            styleInstruction = `Create a polished, high-fashion portrait of the user, as if they were being photographed for the cover of a top Korean fashion magazine. The aesthetic is artistic, sophisticated, and trendy. This is a creative, stylized illustration, not a simple photo edit.`;
             break;
     }
 
@@ -392,13 +392,13 @@ ${variationInstruction}
     let promptText: string;
 
     if (style === 'Celebrity Inspired') {
-        promptText = `**Primary Task: Edit the user's photo to give them a complete K-beauty makeover, compositing their face into a celebrity-inspired style. Your response MUST include the edited image.**
+        promptText = `**Primary Task: Create a stylized fashion portrait of the user, using their photo as a base. Your response MUST include the edited image.**
 
 **CRITICAL REQUIREMENT: Use the user's face from the provided photo.** The most important instruction is to preserve the user's exact facial features, identity, and expression. The final image must be a realistic edit of the original person, not a new person.
 
 **Framing:** ${shotInstruction}
 
-**Theme:** The aesthetic for this makeover is **'${style}'**.
+**Theme:** The artistic aesthetic for this portrait is **'${style}'**.
 *Theme Description:* ${styleInstruction}
 
 **User Profile for Styling:**
@@ -406,9 +406,9 @@ ${variationInstruction}
 *   **Personal Color Season:** ${season}
 
 **Transformation Guidelines:**
-1.  **Face Synthesis:** Keep the user's face, but seamlessly blend it into the new scene.
-2.  **Makeup:** ${makeupInstruction} Apply makeup inspired by top celebrity looks that complement the user's features.
-3.  **Hair:** Change the hair to a trendy Korean style and color that a celebrity might wear, adapted to suit the user's season.
+1.  **Face Synthesis:** Keep the user's face, but seamlessly blend it into the new artistic scene.
+2.  **Makeup:** ${makeupInstruction} Apply makeup that fits the high-fashion, magazine-cover aesthetic.
+3.  **Hair:** Change the hair to a trendy Korean style and color that suits the artistic concept and the user's season.
 4.  **Fashion Details:**
 ${fashionInstruction}
 
