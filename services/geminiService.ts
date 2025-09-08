@@ -378,11 +378,12 @@ export const transformImage = async (
 **Core Task:** Redesign the user's outfit completely to create a diverse set of fashionable looks based on a comprehensive style guide.
 ${variationInstruction}
 **Creative Brief:**
-1.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Actively use different combinations of these colors to show variety.
-2.  **Recommended Fashion Items:** Intelligently and creatively incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**. Prioritize variety in the items chosen for each look.
-3.  **Style Inspiration:** The overall vibe should be inspired by modern K-beauty and celebrity fashion trends. The goal is to create a sophisticated, stylish, and cohesive look.
-4.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
-5.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
+1.  **Seasonal Theme:** Randomly select one of the four seasons (Spring, Summer, Autumn, or Winter) and design a complete outfit that is seasonally appropriate and fashionable. The chosen season should influence the type of clothing (e.g., a light dress for summer, a cozy coat for winter).
+2.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Actively use different combinations of these colors to show variety.
+3.  **Recommended Fashion Items:** Intelligently and creatively incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**. Prioritize variety in the items chosen for each look.
+4.  **Style Inspiration:** The overall vibe should be inspired by modern K-beauty and celebrity fashion trends. The goal is to create a sophisticated, stylish, and cohesive look.
+5.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
+6.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
 `;
 
     let promptText: string;
