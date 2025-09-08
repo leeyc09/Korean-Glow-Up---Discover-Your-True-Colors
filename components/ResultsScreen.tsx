@@ -102,6 +102,21 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, result, collag
     );
 };
 
+const RecommendationPill: React.FC<{ text: string }> = ({ text }) => {
+    // Highlight brand names in parentheses
+    const parts = text.split(/(\(.*?\))/g);
+    return (
+        <span className="px-3 py-1.5 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
+            {parts.map((part, index) => 
+                part.startsWith('(') && part.endsWith(')') ? (
+                    <span key={index} className="font-semibold text-indigo-700">{part}</span>
+                ) : (
+                    part
+                )
+            )}
+        </span>
+    );
+};
 
 interface ResultsScreenProps {
   result: PersonalColorAnalysis;
@@ -110,8 +125,6 @@ interface ResultsScreenProps {
   onBeginStyleTransfer: () => void;
   isTransforming: boolean;
   transformedResults: TransformedResult[];
-  onGenerateMore: () => void;
-  isGeneratingMore: boolean;
   isStyleModalOpen: boolean;
   onCloseStyleModal: () => void;
   onGenerateTransformation: (style: KBeautyStyle) => void;
@@ -124,8 +137,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
     onBeginStyleTransfer, 
     isTransforming, 
     transformedResults,
-    onGenerateMore,
-    isGeneratingMore,
     isStyleModalOpen,
     onCloseStyleModal,
     onGenerateTransformation,
@@ -237,15 +248,56 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
           
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-2xl font-bold mb-4 text-gray-800">Style Recommendations</h3>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Fashion Tips */}
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                   <FashionIcon className="h-6 w-6" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h4 className="text-xl font-semibold text-gray-800">Fashion Tips</h4>
-                  <p className="mt-1 text-gray-600 leading-relaxed">{result.fashionTips}</p>
+                   <div className="mt-3 space-y-4">
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Key Clothing Items</h5>
+                            <div className="mt-2 space-y-3">
+                                {result.fashionTips.clothingItems.map((tip, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={tip.item} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Why it works:</span> {tip.reason}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Fabrics & Textures</h5>
+                             <div className="mt-2 space-y-3">
+                                {result.fashionTips.fabricsAndTextures.map((tip, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={tip.item} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Why it works:</span> {tip.reason}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Accessories</h5>
+                            <div className="mt-2 space-y-3">
+                                {result.fashionTips.accessories.map((tip, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={tip.item} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Why it works:</span> {tip.reason}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                   </div>
+                   <p className="mt-4 text-sm text-gray-600 italic">"{result.fashionTips.styleInspiration}"</p>
                 </div>
               </div>
               
@@ -254,9 +306,50 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-600">
                   <MakeupIcon className="h-6 w-6" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h4 className="text-xl font-semibold text-gray-800">Makeup Tips</h4>
-                  <p className="mt-1 text-gray-600 leading-relaxed">{result.makeupTips}</p>
+                  <div className="mt-3 space-y-4">
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Face</h5>
+                            <div className="mt-2 space-y-3">
+                                {result.makeupTips.face.map((item, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={item.product} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Technique:</span> {item.technique}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Eyes</h5>
+                            <div className="mt-2 space-y-3">
+                                {result.makeupTips.eyes.map((item, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={item.product} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Technique:</span> {item.technique}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold text-gray-700">Lips</h5>
+                            <div className="mt-2 space-y-3">
+                                {result.makeupTips.lips.map((item, i) => (
+                                    <div key={i}>
+                                        <RecommendationPill text={item.product} />
+                                        <p className="text-sm text-gray-600 mt-1.5 ml-1 italic">
+                                            <span className="font-semibold not-italic">Technique:</span> {item.technique}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                   </div>
+                   <p className="mt-4 text-sm text-gray-600 italic">"{result.makeupTips.generalTip}"</p>
                 </div>
               </div>
               
@@ -272,6 +365,31 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                           <span key={index} className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
                               {color}
                           </span>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Hair Styling Tips */}
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-teal-100 text-teal-600">
+                  <SparklesIcon className="h-6 w-6" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-semibold text-gray-800">Recommended Hair Styles</h4>
+                  <div className="mt-3 space-y-4">
+                      {result.hairStylingTips.map((tip, index) => (
+                          <div key={index} className="p-4 bg-gray-100 rounded-lg">
+                              <h5 className="font-bold text-gray-800">{tip.style}</h5>
+                              <p className="text-sm text-gray-600 mt-1 mb-2">{tip.description}</p>
+                              <div className="flex flex-wrap gap-2">
+                                {tip.products.map((product, pIndex) => (
+                                    <span key={pIndex} className="px-2.5 py-1 bg-white text-gray-700 rounded-full text-xs font-medium border border-gray-200">
+                                      {product}
+                                    </span>
+                                ))}
+                              </div>
+                          </div>
                       ))}
                   </div>
                 </div>
@@ -325,7 +443,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
         {transformedResults.length === 0 && (
              <div className="text-center p-8 bg-gray-100 rounded-lg">
                  <h2 className="text-2xl font-bold text-gray-800">Ready for a Makeover?</h2>
-                 <p className="text-gray-600 mt-2 mb-6 max-w-2xl mx-auto">See how you'd look with K-beauty styling inspired by your results. Generate different shots of your new look one by one.</p>
+                 <p className="text-gray-600 mt-2 mb-6 max-w-2xl mx-auto">See how you'd look with K-beauty styling inspired by your results. Generate different shots of your new look.</p>
                  <button
                     onClick={onBeginStyleTransfer}
                     disabled={isTransforming}
@@ -334,7 +452,7 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                     {isTransforming ? (
                         <>
                             <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                            <span>Generating First Look...</span>
+                            <span>Generating Your Styles...</span>
                         </>
                     ) : (
                         <>
@@ -359,28 +477,6 @@ const ResultsScreen: React.FC<ResultsScreenProps> = ({
                         </div>
                     ))}
                 </div>
-                
-                {transformedResults.length < 3 && (
-                    <div className="text-center mt-8">
-                        <button
-                            onClick={onGenerateMore}
-                            disabled={isGeneratingMore}
-                            className="flex items-center gap-3 mx-auto rounded-md bg-green-500 px-6 py-3 text-lg font-semibold text-white shadow-lg hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition-all duration-200 ease-in-out hover:scale-105 disabled:bg-gray-400 disabled:scale-100"
-                        >
-                            {isGeneratingMore ? (
-                                <>
-                                    <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                                    <span>Generating...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <PlusIcon className="h-6 w-6" />
-                                    Generate Next Shot
-                                </>
-                            )}
-                        </button>
-                    </div>
-                )}
             </div>
         )}
       </div>

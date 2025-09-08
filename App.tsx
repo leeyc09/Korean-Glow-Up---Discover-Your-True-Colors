@@ -26,7 +26,6 @@ const App: React.FC = () => {
 
   const [isTransforming, setIsTransforming] = useState<boolean>(false);
   const [transformedResults, setTransformedResults] = useState<TransformedResult[]>([]);
-  const [isGeneratingMore, setIsGeneratingMore] = useState<boolean>(false);
   const [isStyleModalOpen, setIsStyleModalOpen] = useState<boolean>(false);
   const [selectedStyle, setSelectedStyle] = useState<KBeautyStyle | null>(null);
 
@@ -88,7 +87,6 @@ const App: React.FC = () => {
       setGender(null);
       setIsTransforming(false);
       setTransformedResults([]);
-      setIsGeneratingMore(false);
       setIsStyleModalOpen(false);
       setSelectedStyle(null);
       setCurrentStep(AppStep.Welcome);
@@ -110,26 +108,29 @@ const App: React.FC = () => {
     setTransformedResults([]); // Clear previous results
 
     try {
-        // Generate only the FIRST shot type from the sequence to avoid rate limits
-        const shotType = shotTypeSequence[0];
-        
-        const res = await transformImage(
-            imageSrc, 
-            analysisResult.season, 
-            analysisResult.koreanCelebrity.name, 
-            analysisResult.fashionTips, 
-            gender, 
-            style, 
-            shotType
+        // Generate all 3 shot types in parallel
+        const transformationPromises = shotTypeSequence.map((shotType) => 
+            transformImage(
+                imageSrc, 
+                analysisResult.season, 
+                analysisResult.koreanCelebrity.name, 
+                analysisResult.fashionTips, 
+                gender, 
+                style, 
+                shotType,
+                analysisResult.palette
+            )
         );
+
+        const results = await Promise.all(transformationPromises);
         
-        const newResult = {
+        const newResults = results.map(res => ({
             id: nextId++,
             image: res.newImageBase64,
             description: res.description,
-        };
+        }));
         
-        setTransformedResults([newResult]);
+        setTransformedResults(newResults);
 
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
@@ -142,46 +143,6 @@ const App: React.FC = () => {
         setIsTransforming(false);
     }
   }, [imageSrc, analysisResult, gender]);
-
-  const handleGenerateMore = useCallback(async () => {
-    if (!imageSrc || !analysisResult || !gender || !selectedStyle) {
-        setError("Missing data for generating more styles.");
-        return;
-    }
-
-    const nextShotIndex = transformedResults.length;
-    if (nextShotIndex >= shotTypeSequence.length) {
-        console.log("All shot types have been generated.");
-        return;
-    }
-
-    setIsGeneratingMore(true);
-    setError(null);
-    try {
-        const shotType = shotTypeSequence[nextShotIndex];
-        const { newImageBase64, description } = await transformImage(
-            imageSrc,
-            analysisResult.season,
-            analysisResult.koreanCelebrity.name,
-            analysisResult.fashionTips,
-            gender,
-            selectedStyle,
-            shotType,
-            // Pass palette for the last shot for more variation
-            nextShotIndex === shotTypeSequence.length - 1 ? analysisResult.palette : undefined
-        );
-        setTransformedResults(prev => [...prev, {
-            id: nextId++,
-            image: newImageBase64,
-            description: description,
-        }]);
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-        setError(errorMessage);
-    } finally {
-        setIsGeneratingMore(false);
-    }
-  }, [imageSrc, analysisResult, gender, selectedStyle, transformedResults]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -211,8 +172,6 @@ const App: React.FC = () => {
                         onBeginStyleTransfer={handleBeginStyleTransfer}
                         isTransforming={isTransforming}
                         transformedResults={transformedResults}
-                        onGenerateMore={handleGenerateMore}
-                        isGeneratingMore={isGeneratingMore}
                         isStyleModalOpen={isStyleModalOpen}
                         onCloseStyleModal={() => setIsStyleModalOpen(false)}
                         onGenerateTransformation={handleGenerateTransformation}

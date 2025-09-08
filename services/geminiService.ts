@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 // Fix: `Gender` is an enum used as a value, so it needs to be a regular import, not a type-only import.
-import { Gender, type PersonalColorAnalysis, type KBeautyStyle, type ShotType, type ColorInfo, KoreanCelebrity } from '../types';
+import { Gender, type PersonalColorAnalysis, type KBeautyStyle, type ShotType, type ColorInfo, type KoreanCelebrity, type FashionTips, type HairStylingTip, type FashionItem } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
 
@@ -119,12 +119,98 @@ const analysisSchema = {
         required: ["name", "description"]
     },
     makeupTips: {
-        type: Type.STRING,
-        description: "A paragraph with specific K-beauty makeup recommendations suitable for the user's gender. For women, include popular products like lip tints, cushion foundations, and eyeshadow colors. For men, suggest subtle options like concealers, BB creams, or tinted lip balms."
+        type: Type.OBJECT,
+        description: "A detailed object with specific K-beauty makeup recommendations suitable for the user's gender. For each item, provide the product type, brand examples, and a relevant K-beauty technique (e.g., 'gradient lips').",
+        properties: {
+            face: {
+                type: Type.ARRAY,
+                description: "Recommendations for face makeup.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        product: { type: Type.STRING, description: "The product type and brand, e.g., 'Cushion Foundation (Brand: CLIO)'." },
+                        technique: { type: Type.STRING, description: "A relevant K-beauty technique, e.g., 'Apply a thin layer for a glass skin effect.'." }
+                    },
+                    required: ["product", "technique"]
+                }
+            },
+            eyes: {
+                type: Type.ARRAY,
+                description: "Recommendations for eye makeup.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        product: { type: Type.STRING, description: "The product type and brand, e.g., 'Neutral Eyeshadow Palette (Brand: peripera)'." },
+                        technique: { type: Type.STRING, description: "A relevant K-beauty technique, e.g., 'Create Aegyo Sal under the eyes for a youthful look.'." }
+                    },
+                    required: ["product", "technique"]
+                }
+            },
+            lips: {
+                type: Type.ARRAY,
+                description: "Recommendations for lip products.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        product: { type: Type.STRING, description: "The product type and brand, e.g., 'Velvet Lip Tint (Brand: rom&nd)'." },
+                        technique: { type: Type.STRING, description: "A relevant K-beauty technique, e.g., 'Apply on inner lips and blend out for a gradient effect.'." }
+                    },
+                    required: ["product", "technique"]
+                }
+            },
+            generalTip: {
+                type: Type.STRING,
+                description: "A concluding sentence or a general tip about the overall makeup look."
+            }
+        },
+        required: ["face", "eyes", "lips", "generalTip"]
     },
     fashionTips: {
-        type: Type.STRING,
-        description: "A paragraph with fashion advice, including best metals (gold/silver), neutral colors, and how to combine colors effectively."
+        type: Type.OBJECT,
+        description: "A detailed object with K-beauty fashion advice. For each item, provide a brief reason. Provide specific lists for key clothing items, fabrics, and accessories. Also include a general style inspiration tip.",
+        properties: {
+            clothingItems: {
+                type: Type.ARRAY,
+                description: "A list of 3-4 key clothing items. For each, explain why it's recommended.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        item: { type: Type.STRING, description: "The name of the clothing item, e.g., 'Oversized blazer'." },
+                        reason: { type: Type.STRING, description: "A brief reason why this item suits the user's color season." }
+                    },
+                    required: ["item", "reason"]
+                }
+            },
+            fabricsAndTextures: {
+                type: Type.ARRAY,
+                description: "A list of 2-3 recommended fabrics or textures. For each, explain why it's recommended.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        item: { type: Type.STRING, description: "The name of the fabric or texture, e.g., 'Linen'." },
+                        reason: { type: Type.STRING, description: "A brief reason why this fabric suits the user's color season." }
+                    },
+                    required: ["item", "reason"]
+                }
+            },
+            accessories: {
+                type: Type.ARRAY,
+                description: "A list of 2-3 accessory recommendations. For each, explain why it's recommended.",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        item: { type: Type.STRING, description: "The name of the accessory, e.g., 'Silver jewelry'." },
+                        reason: { type: Type.STRING, description: "A brief reason why this accessory suits the user's color season." }
+                    },
+                    required: ["item", "reason"]
+                }
+            },
+            styleInspiration: {
+                type: Type.STRING,
+                description: "A concluding sentence summarizing the fashion style or mentioning a current Korean fashion trend."
+            }
+        },
+        required: ["clothingItems", "fabricsAndTextures", "accessories", "styleInspiration"]
     },
     hairColorRecommendations: {
       type: Type.ARRAY,
@@ -132,9 +218,34 @@ const analysisSchema = {
       items: {
         type: Type.STRING
       }
+    },
+    hairStylingTips: {
+      type: Type.ARRAY,
+      description: "An array of 2-3 K-beauty hair styling recommendations. For each style, include a brief description and a list of specific products or tools to achieve it.",
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          style: {
+            type: Type.STRING,
+            description: "The name of the hairstyle, e.g., 'Soft Waves', 'See-through Bangs'."
+          },
+          description: {
+            type: Type.STRING,
+            description: "A brief, one-sentence description of the hairstyle."
+          },
+          products: {
+            type: Type.ARRAY,
+            description: "A list of 2-3 recommended products or tools, e.g., 'Texturizing spray', '32mm curling iron'.",
+            items: {
+              type: Type.STRING
+            }
+          }
+        },
+        required: ["style", "description", "products"]
+      }
     }
   },
-  required: ["season", "description", "palette", "colorsToAvoid", "koreanCelebrity", "makeupTips", "fashionTips", "hairColorRecommendations"]
+  required: ["season", "description", "palette", "colorsToAvoid", "koreanCelebrity", "makeupTips", "fashionTips", "hairColorRecommendations", "hairStylingTips"]
 };
 
 type PartialAnalysisResult = Omit<PersonalColorAnalysis, 'koreanCelebrity'> & {
@@ -157,7 +268,9 @@ export const analyzePersonalColor = async (imageBase64: string, gender: Gender):
     
     IMPORTANT: Do NOT provide an image URL for the celebrity. Only provide their name and a descriptive sentence.
 
-    For makeup, recommend K-beauty products suitable for their gender. Also suggest trendy Korean hair colors.
+    For makeup, recommend specific K-beauty products, popular brands, and application techniques suitable for their gender. 
+    For fashion, recommend specific clothing items, fabrics, and accessories relevant to Korean style; for each, provide a brief reason why it suits the user's personal color.
+    Also suggest trendy Korean hair colors. For hair styling, recommend 2-3 K-beauty styles suitable for their gender. For each style, provide a brief description and a list of 2-3 specific product types or tools (e.g., 'Sea salt spray', '32mm curling iron', 'Hair essence') needed to achieve it.
     In addition to the recommended palette, please also provide a list of 3-4 colors the user should avoid.
     Ensure the user has natural lighting and minimal makeup for best results.
     Provide the result in the specified JSON format.`,
@@ -187,11 +300,19 @@ export const analyzePersonalColor = async (imageBase64: string, gender: Gender):
   }
 };
 
+const formatFashionTipsForPrompt = (tips: FashionTips): string => {
+    const clothing = `Key items to wear include ${tips.clothingItems.map(i => i.item).join(', ')}.`;
+    const fabrics = `Focus on fabrics like ${tips.fabricsAndTextures.map(i => i.item).join(', ')}.`;
+    const accessories = `Accessorize with ${tips.accessories.map(i => i.item).join(', ')}.`;
+    return `${clothing} ${fabrics} ${accessories} Overall, the style is about ${tips.styleInspiration}.`;
+};
+
+
 export const transformImage = async (
   imageBase64: string,
   season: string,
   celebrityName: string,
-  fashionTips: string,
+  fashionTips: FashionTips,
   gender: Gender,
   style: KBeautyStyle,
   shotType: ShotType,
@@ -243,11 +364,18 @@ export const transformImage = async (
             break;
     }
 
-    let fashionInstruction = `Creatively redesign the user's outfit by interpreting and applying the following personalized fashion advice: "${fashionTips}". It is crucial that you adapt these tips to perfectly match the chosen '${style}' aesthetic and the user's '${season}' personal color season. The goal is a cohesive, stylish, and fashionable look.`;
-    if (palette && palette.length > 0) {
-        const colorNames = palette.map(c => c.name).join(', ');
-        fashionInstruction += ` Furthermore, when generating this new clothing variation, style the outfit using a creative combination of colors from the user's personal palette, which includes: ${colorNames}.`;
-    }
+    const fashionTipsString = formatFashionTipsForPrompt(fashionTips);
+    const colorNames = palette && palette.length > 0 ? palette.map(c => c.name).join(', ') : 'the provided seasonal colors';
+    
+    const fashionInstruction = `
+**Core Task:** Redesign the user's outfit completely based on a comprehensive style guide.
+**Creative Brief:**
+1.  **Personal Color Palette:** The new outfit's color scheme **must** be based on the user's personal color palette: **${colorNames}**. Use a harmonious and stylish combination of these colors.
+2.  **Recommended Fashion Items:** Intelligently incorporate elements from the user's personalized fashion recommendations: **"${fashionTipsString}"**.
+3.  **Celebrity Style Inspiration:** The overall vibe and specific fashion pieces should be heavily influenced by the signature style of **${celebrityName}**. Emulate their fashion sense.
+4.  **Chosen Aesthetic:** All fashion choices must align perfectly with the selected theme: **'${style}'**.
+5.  **Cohesion:** The final look must be cohesive, fashionable, and suitable for the user's gender and personal color season ('${season}').
+`;
 
     let promptText: string;
 
@@ -270,7 +398,8 @@ export const transformImage = async (
 1.  **Face Synthesis:** Keep the user's face, but seamlessly blend it into the new scene.
 2.  **Makeup:** ${makeupInstruction} Apply makeup inspired by ${celebrityName}'s signature looks.
 3.  **Hair:** Change the hair to a trendy Korean style and color that ${celebrityName} might wear, adapted to suit the user's season.
-4.  **Fashion:** ${fashionInstruction} Dress the user in an outfit that reflects ${celebrityName}'s iconic fashion sense.
+4.  **Fashion Details:**
+${fashionInstruction}
 
 **Output Requirement:**
 After generating the edited image, provide a short, single-paragraph text description of the changes made (makeup, hair, fashion) and how they align with the '${style}' theme and the requested framing (${shotDescription}). Do not respond with only text.`;
@@ -290,7 +419,8 @@ After generating the edited image, provide a short, single-paragraph text descri
 **Transformation Guidelines:**
 1.  **Makeup:** ${makeupInstruction}
 2.  **Hair:** Change the hair to a trendy Korean style and color that suits their season and the theme.
-3.  **Fashion:** ${fashionInstruction}
+3.  **Fashion Details:**
+${fashionInstruction}
 
 **Output Requirement:**
 After generating the edited image, provide a short, single-paragraph text description of the changes made (makeup, hair, fashion) and how they align with the '${style}' theme and the requested framing (${shotDescription}). Do not respond with only text.`;
